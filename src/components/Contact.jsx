@@ -45,19 +45,28 @@ const Contact = () => {
                         I'm currently looking for new opportunities. Whether you have a question or just want to say hi, I'll try my best to get back to you!
                     </p>
 
-                    <form style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '1.5rem',
-                        maxWidth: '500px',
-                        margin: '0 auto',
-                        textAlign: 'left'
-                    }}>
+                    <form 
+                        action="https://formsubmit.co/markglentablada55@gmail.com" 
+                        method="POST"
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '1.5rem',
+                            maxWidth: '500px',
+                            margin: '0 auto',
+                            textAlign: 'left'
+                        }}
+                    >
+                        {/* Honeypot to prevent spam */}
+                        <input type="text" name="_honey" style={{ display: 'none' }} />
+                        {/* Disable Captcha for better UX (optional, you can remove this if you want captcha) */}
+                        <input type="hidden" name="_captcha" value="false" />
+                        
                         <div style={{ display: 'flex', gap: '1rem', flexDirection: 'column' }}>
-                            <input type="text" placeholder="Your Name" style={inputStyle} />
-                            <input type="email" placeholder="Your Email" style={inputStyle} />
+                            <input type="text" name="name" placeholder="Your Name" style={inputStyle} required />
+                            <input type="email" name="email" placeholder="Your Email" style={inputStyle} required />
                         </div>
-                        <textarea rows="5" placeholder="Your Message" style={{ ...inputStyle, resize: 'vertical' }}></textarea>
+                        <textarea name="message" rows="5" placeholder="Your Message" style={{ ...inputStyle, resize: 'vertical' }} required></textarea>
                         <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '1rem', padding: '1rem' }}>
                             Send Message
                         </button>
