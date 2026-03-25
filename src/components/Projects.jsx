@@ -60,6 +60,14 @@ const Projects = () => {
             tags: ["React", "Laravel", "Node.js"],
             link: "https://github.com/NowUSeeMee?tab=repositories",
             image: "/images/schoolmoniring.png"
+        },
+        {
+            id: 8,
+            title: "Anime Streaming Platform",
+            description: "A feature-rich anime streaming application with a custom video player, backend proxying, and reliable access to diverse video sources.",
+            tags: ["React", "Node.js"],
+            link: "https://github.com/NowUSeeMee?tab=repositories",
+            image: "/images/anime.png"
         }
     ];
 
