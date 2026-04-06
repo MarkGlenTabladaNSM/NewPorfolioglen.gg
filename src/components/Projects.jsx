@@ -8,7 +8,7 @@ const Projects = () => {
         {
             id: 1,
             title: "Neon E-Commerce",
-            description: "A high-performance modern e-commerce platform built with React, Node.js, and Stripe integration.",
+            description: "A high-performance modern e-commerce platform built with React, Node.js, and Stripe integration, featuring a sleek neon-inspired UI/UX.",
             tags: ["React", "Node.js", "MongoDB", "Stripe"],
             link: "https://github.com/NowUSeeMee?tab=repositories",
             image: null
@@ -24,7 +24,7 @@ const Projects = () => {
         {
             id: 3,
             title: "Finance Dashboard",
-            description: "Real-time cryptocurrency tracking dashboard with interactive charts and portfolio management.",
+            description: "Real-time cryptocurrency tracking dashboard with interactive charts, portfolio management, and advanced financial analytics.",
             tags: ["TypeScript", "Next.js", "Chart.js", "Tailwind"],
             link: "https://github.com/NowUSeeMee?tab=repositories",
             image: null
@@ -32,7 +32,7 @@ const Projects = () => {
         {
             id: 4,
             title: "AI Image Generator",
-            description: "SaaS application utilizing OpenAI's API to generate and edit images with complex prompts.",
+            description: "A feature-rich SaaS application utilizing OpenAI's DALL-E API to generate, edit, and share high-quality AI-generated images.",
             tags: ["OpenAI API", "React", "Express", "PostgreSQL"],
             link: "https://github.com/NowUSeeMee?tab=repositories",
             image: null
@@ -68,6 +68,14 @@ const Projects = () => {
             tags: ["React", "Node.js"],
             link: "https://github.com/NowUSeeMee?tab=repositories",
             image: "/images/anime.png"
+        },
+        {
+            id: 9,
+            title: "Bravion VPN",
+            description: "A professional-grade VPN application with a sleek, modern interface, powered by the WireGuard protocol for industry-leading speed and security.",
+            tags: ["React", "Electron", "WireGuard", "Node.js"],
+            link: "https://github.com/NowUSeeMee?tab=repositories",
+            image: "/images/Vpn.png"
         }
     ];
 
