@@ -88,7 +88,7 @@ const Resume = () => {
                             <h3 style={{ marginBottom: '1.5rem', fontSize: '1.6rem', fontWeight: '700' }}>Resume Preview</h3>
                             
                             <div style={{ width: '100%', height: '600px', marginBottom: '1.5rem', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--glass-border)', background: '#fff' }}>
-                                <iframe src={resumeData} width="100%" height="100%" style={{ border: 'none' }} title="Resume Preview"></iframe>
+                                <iframe src={`${resumeData}#toolbar=0&navpanes=0&scrollbar=0`} width="100%" height="100%" style={{ border: 'none' }} title="Resume Preview"></iframe>
                             </div>
 
                             <a 
