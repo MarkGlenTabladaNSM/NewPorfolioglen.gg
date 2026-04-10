@@ -69,25 +69,25 @@ const Resume = () => {
                         border: '1px solid var(--glass-border)'
                     }}
                 >
-                    <div style={{
-                        width: '90px',
-                        height: '90px',
-                        background: 'rgba(var(--accent-rgb), 0.1)',
-                        borderRadius: '50%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: 'var(--accent-color)',
-                        boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
-                    }}>
-                        <FileText size={45} />
-                    </div>
+                    {!resumeData && (
+                        <div style={{
+                            width: '90px',
+                            height: '90px',
+                            background: 'rgba(var(--accent-rgb), 0.1)',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: 'var(--accent-color)',
+                            boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
+                        }}>
+                            <FileText size={45} />
+                        </div>
+                    )}
 
                     {resumeData ? (
                         <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                            <h3 style={{ marginBottom: '1.5rem', fontSize: '1.6rem', fontWeight: '700' }}>Resume Preview</h3>
-                            
-                            <div style={{ width: '100%', height: '600px', marginBottom: '1.5rem', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--glass-border)', background: '#fff' }}>
+                            <div style={{ width: '100%', height: '1050px', marginBottom: '1.5rem', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--glass-border)', background: '#fff' }}>
                                 <iframe src={`${resumeData}#toolbar=0&navpanes=0&scrollbar=0`} width="100%" height="100%" style={{ border: 'none' }} title="Resume Preview"></iframe>
                             </div>
 
