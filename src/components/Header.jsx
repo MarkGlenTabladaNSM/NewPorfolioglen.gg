@@ -1,10 +1,20 @@
-import { useState, useEffect } from 'react';
-import { Sun, Moon, Menu, X } from 'lucide-react';
+import { useState, useEffect, useContext } from 'react';
+import { Sun, Moon, Menu, X, LogOut } from 'lucide-react';
+import LoginModal from './LoginModal';
+import { AuthContext } from '../context/AuthContext';
 
 const Header = () => {
     const [scrolled, setScrolled] = useState(false);
     const [theme, setTheme] = useState('dark');
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+    const { isLoggedIn, logout } = useContext(AuthContext);
+
+    const handleLogoClick = () => {
+        if (!isLoggedIn) {
+            setIsLoginModalOpen(true);
+        }
+    };
 
     useEffect(() => {
         const handleScroll = () => {
@@ -49,11 +59,13 @@ const Header = () => {
                 alignItems: 'center',
                 position: 'relative'
             }}>
-                <div className="logo" style={{
+                <div className="logo" onClick={handleLogoClick} style={{
                     fontFamily: 'var(--font-display)',
                     fontSize: '1.5rem',
                     fontWeight: 800,
-                    letterSpacing: '-0.5px'
+                    letterSpacing: '-0.5px',
+                    cursor: isLoggedIn ? 'default' : 'pointer',
+                    userSelect: 'none'
                 }}>
                     Port<span className="text-gradient">folio.</span>
                 </div>
@@ -64,6 +76,7 @@ const Header = () => {
                             <li><a href="#about" className="nav-link" onClick={() => setMobileMenuOpen(false)}>About</a></li>
                             <li><a href="#projects" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Projects</a></li>
                             <li><a href="#contact" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Contact</a></li>
+                            <li><a href="#resume" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Resume</a></li>
                         </ul>
                     </nav>
 
@@ -86,6 +99,27 @@ const Header = () => {
                     >
                         {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
                     </button>
+
+                    {isLoggedIn && (
+                        <button
+                            onClick={logout}
+                            title="Admin Logout"
+                            style={{
+                                background: 'transparent',
+                                border: 'none',
+                                color: '#ff4d4f',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                padding: '0.5rem',
+                                borderRadius: '50%',
+                                transition: 'background 0.3s ease'
+                            }}
+                        >
+                            <LogOut size={20} />
+                        </button>
+                    )}
 
                     <button
                         className="mobile-menu-btn"
@@ -164,6 +198,7 @@ const Header = () => {
           }
         }
       `}</style>
+            <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
         </header>
     );
 };
