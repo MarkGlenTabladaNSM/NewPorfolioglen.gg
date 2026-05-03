@@ -152,8 +152,7 @@ const Resume = () => {
                         <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                             <div style={{ 
                                 width: '100%', 
-                                height: '600px', 
-                                maxHeight: '80vh',
+                                height: '1100px', 
                                 marginBottom: '1.5rem', 
                                 borderRadius: '12px', 
                                 overflow: 'hidden', 
