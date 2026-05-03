@@ -12,6 +12,12 @@ const Resume = () => {
     const fileInputRef = useRef(null);
 
     const fetchResume = async () => {
+        if (!supabase) {
+            console.warn('Supabase not initialized. Resume cloud features disabled.');
+            setResumeData(null);
+            setIsLoading(false);
+            return;
+        }
         setIsLoading(true);
         try {
             // Get public URL
