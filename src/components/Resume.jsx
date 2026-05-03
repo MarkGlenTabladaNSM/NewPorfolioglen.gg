@@ -1,51 +1,74 @@
 import { useState, useContext, useEffect, useRef } from 'react';
 import { AuthContext } from '../context/AuthContext';
-import { Upload, FileText, Download, ExternalLink } from 'lucide-react';
+import { Upload, FileText, Download, ExternalLink, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { supabase } from '../supabaseClient';
 
 const Resume = () => {
     const { isLoggedIn } = useContext(AuthContext);
     const [resumeData, setResumeData] = useState(null);
-    const [isDefault, setIsDefault] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isUploading, setIsUploading] = useState(false);
     const fileInputRef = useRef(null);
 
-    const DEFAULT_RESUME_PATH = '/resume.pdf';
+    const fetchResume = async () => {
+        setIsLoading(true);
+        try {
+            // Get public URL
+            const { data: { publicUrl } } = supabase.storage.from('portfolio').getPublicUrl('resume.pdf');
+            
+            // Verify if the file actually exists by trying to get its metadata or listing
+            const { data, error } = await supabase.storage.from('portfolio').list('', {
+                limit: 1,
+                offset: 0,
+                search: 'resume.pdf'
+            });
+
+            if (data && data.length > 0) {
+                // Add a timestamp to bypass browser cache
+                setResumeData(`${publicUrl}?t=${new Date().getTime()}`);
+            } else {
+                setResumeData(null);
+            }
+        } catch (err) {
+            console.error('Error fetching resume:', err);
+            setResumeData(null);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const storedResume = localStorage.getItem('portfolio_resume');
-        if (storedResume) {
-            setResumeData(storedResume);
-            setIsDefault(false);
-        } else {
-            // Try to load default resume from public folder
-            fetch(DEFAULT_RESUME_PATH, { method: 'HEAD' })
-                .then(res => {
-                    if (res.ok) {
-                        setResumeData(DEFAULT_RESUME_PATH);
-                        setIsDefault(true);
-                    }
-                })
-                .catch(() => {
-                    console.log('No default resume found at /resume.pdf');
-                });
-        }
+        fetchResume();
     }, []);
 
-    const handleFileChange = (e) => {
+    const handleFileChange = async (e) => {
         const file = e.target.files[0];
-        if (file) {
-            if (file.type !== 'application/pdf') {
-                alert('Please upload a PDF file.');
-                return;
-            }
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                const base64String = event.target.result;
-                localStorage.setItem('portfolio_resume', base64String);
-                setResumeData(base64String);
-                setIsDefault(false);
-            };
-            reader.readAsDataURL(file);
+        if (!file) return;
+
+        if (file.type !== 'application/pdf') {
+            alert('Please upload a PDF file.');
+            return;
+        }
+
+        setIsUploading(true);
+        try {
+            const { data, error } = await supabase.storage
+                .from('portfolio')
+                .upload('resume.pdf', file, {
+                    upsert: true,
+                    cacheControl: '0' // Force no-cache
+                });
+
+            if (error) throw error;
+            
+            alert('Resume updated successfully! It may take a minute to update on all devices.');
+            fetchResume();
+        } catch (error) {
+            console.error('Upload error:', error);
+            alert('Upload failed: ' + error.message);
+        } finally {
+            setIsUploading(false);
         }
     };
 
@@ -83,28 +106,39 @@ const Resume = () => {
                         flexDirection: 'column',
                         alignItems: 'center',
                         gap: '1.5rem',
-                        border: '1px solid var(--glass-border)'
+                        border: '1px solid var(--glass-border)',
+                        minHeight: '300px',
+                        justifyContent: 'center'
                     }}
                 >
-                    {!resumeData && (
-                        <div style={{
-                            width: '90px',
-                            height: '90px',
-                            background: 'rgba(var(--accent-rgb), 0.1)',
-                            borderRadius: '50%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            color: 'var(--accent-color)',
-                            boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
-                        }}>
-                            <FileText size={45} />
+                    {isLoading ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+                            <Loader2 size={40} className="animate-spin text-accent-color" />
+                            <p>Loading resume from cloud...</p>
                         </div>
-                    )}
-
-                    {resumeData ? (
+                    ) : !resumeData ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}>
+                            <div style={{
+                                width: '90px',
+                                height: '90px',
+                                background: 'rgba(var(--accent-rgb), 0.1)',
+                                borderRadius: '50%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: 'var(--accent-color)'
+                            }}>
+                                <FileText size={45} />
+                            </div>
+                            <div style={{ padding: '1rem 0' }}>
+                                <h3 style={{ marginBottom: '0.5rem', fontSize: '1.4rem' }}>No Resume Available</h3>
+                                <p style={{ color: 'var(--text-secondary)' }}>
+                                    {isLoggedIn ? 'Please upload your resume (PDF) using the admin controls below.' : 'The resume has not been uploaded to the cloud yet.'}
+                                </p>
+                            </div>
+                        </div>
+                    ) : (
                         <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                            {/* PDF Preview Container - Responsive Height */}
                             <div style={{ 
                                 width: '100%', 
                                 height: '600px', 
@@ -124,7 +158,6 @@ const Resume = () => {
                                     title="Resume Preview"
                                 ></iframe>
                                 
-                                {/* Overlay for mobile to encourage direct view if iframe is wonky */}
                                 <div className="md:hidden" style={{ position: 'absolute', bottom: '10px', right: '10px' }}>
                                     <a href={resumeData} target="_blank" rel="noopener noreferrer" className="btn btn-secondary" style={{ padding: '0.5rem', fontSize: '0.7rem' }}>
                                         <ExternalLink size={14} /> Full Screen
@@ -153,13 +186,6 @@ const Resume = () => {
                                 </a>
                             </div>
                         </div>
-                    ) : (
-                        <div style={{ padding: '2rem 0' }}>
-                            <h3 style={{ marginBottom: '0.5rem', fontSize: '1.4rem' }}>No Resume Available</h3>
-                            <p style={{ color: 'var(--text-secondary)' }}>
-                                {isLoggedIn ? 'Please upload your resume (PDF) below.' : 'The resume has not been uploaded yet. Please check back later.'}
-                            </p>
-                        </div>
                     )}
 
                     {isLoggedIn && (
@@ -169,7 +195,7 @@ const Resume = () => {
                             borderTop: '1px solid var(--glass-border)',
                             width: '100%'
                         }}>
-                            <h4 style={{ marginBottom: '1.5rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', fontSize: '0.85rem' }}>Admin Controls</h4>
+                            <h4 style={{ marginBottom: '1.5rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px', fontSize: '0.85rem' }}>Cloud Admin Controls</h4>
                             <input 
                                 type="file" 
                                 accept="application/pdf"
@@ -177,16 +203,25 @@ const Resume = () => {
                                 onChange={handleFileChange}
                                 style={{ display: 'none' }}
                             />
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
                                 <button 
                                     onClick={triggerFileInput}
+                                    disabled={isUploading}
                                     className="btn btn-secondary"
-                                    style={{ display: 'inline-flex', alignItems: 'center', gap: '0.8rem', justifyContent: 'center' }}
+                                    style={{ display: 'inline-flex', alignItems: 'center', gap: '0.8rem', justifyContent: 'center', minWidth: '220px' }}
                                 >
-                                    <Upload size={20} /> {resumeData ? 'Replace Resume (Local)' : 'Upload Resume (Local)'}
+                                    {isUploading ? (
+                                        <>
+                                            <Loader2 size={20} className="animate-spin" /> Uploading to Cloud...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Upload size={20} /> {resumeData ? 'Replace Resume (Everywhere)' : 'Upload Resume (Everywhere)'}
+                                        </>
+                                    )}
                                 </button>
-                                <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', maxWidth: '300px' }}>
-                                    Note: Local uploads only save on this device. For a permanent fix, place <b>resume.pdf</b> in your project's <b>public</b> folder.
+                                <p style={{ fontSize: '0.75rem', color: 'var(--accent-color)', fontWeight: '500' }}>
+                                    ⚡ This will update your resume for all users on all devices instantly.
                                 </p>
                             </div>
                         </div>
@@ -198,4 +233,5 @@ const Resume = () => {
 };
 
 export default Resume;
+
 
