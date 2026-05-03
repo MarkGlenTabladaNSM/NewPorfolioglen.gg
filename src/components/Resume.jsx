@@ -52,6 +52,11 @@ const Resume = () => {
         const file = e.target.files[0];
         if (!file) return;
 
+        if (!supabase) {
+            alert('Cloud connection not ready. Please refresh the page or check your Netlify settings.');
+            return;
+        }
+
         if (file.type !== 'application/pdf') {
             alert('Please upload a PDF file.');
             return;
