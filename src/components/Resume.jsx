@@ -1,17 +1,33 @@
 import { useState, useContext, useEffect, useRef } from 'react';
 import { AuthContext } from '../context/AuthContext';
-import { Upload, FileText, Download } from 'lucide-react';
+import { Upload, FileText, Download, ExternalLink } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const Resume = () => {
     const { isLoggedIn } = useContext(AuthContext);
     const [resumeData, setResumeData] = useState(null);
+    const [isDefault, setIsDefault] = useState(false);
     const fileInputRef = useRef(null);
+
+    const DEFAULT_RESUME_PATH = '/resume.pdf';
 
     useEffect(() => {
         const storedResume = localStorage.getItem('portfolio_resume');
         if (storedResume) {
             setResumeData(storedResume);
+            setIsDefault(false);
+        } else {
+            // Try to load default resume from public folder
+            fetch(DEFAULT_RESUME_PATH, { method: 'HEAD' })
+                .then(res => {
+                    if (res.ok) {
+                        setResumeData(DEFAULT_RESUME_PATH);
+                        setIsDefault(true);
+                    }
+                })
+                .catch(() => {
+                    console.log('No default resume found at /resume.pdf');
+                });
         }
     }, []);
 
@@ -27,6 +43,7 @@ const Resume = () => {
                 const base64String = event.target.result;
                 localStorage.setItem('portfolio_resume', base64String);
                 setResumeData(base64String);
+                setIsDefault(false);
             };
             reader.readAsDataURL(file);
         }
@@ -59,7 +76,7 @@ const Resume = () => {
                     style={{
                         maxWidth: '800px',
                         margin: '0 auto',
-                        padding: '3rem 2rem',
+                        padding: '2rem 1rem',
                         borderRadius: '24px',
                         textAlign: 'center',
                         display: 'flex',
@@ -87,23 +104,61 @@ const Resume = () => {
 
                     {resumeData ? (
                         <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                            <div style={{ width: '100%', height: '1050px', marginBottom: '1.5rem', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--glass-border)', background: '#fff' }}>
-                                <iframe src={`${resumeData}#toolbar=0&navpanes=0&scrollbar=0`} width="100%" height="100%" style={{ border: 'none' }} title="Resume Preview"></iframe>
+                            {/* PDF Preview Container - Responsive Height */}
+                            <div style={{ 
+                                width: '100%', 
+                                height: '600px', 
+                                maxHeight: '80vh',
+                                marginBottom: '1.5rem', 
+                                borderRadius: '12px', 
+                                overflow: 'hidden', 
+                                border: '1px solid var(--glass-border)', 
+                                background: '#fff',
+                                position: 'relative'
+                            }}>
+                                <iframe 
+                                    src={`${resumeData}#toolbar=0&navpanes=0&scrollbar=0`} 
+                                    width="100%" 
+                                    height="100%" 
+                                    style={{ border: 'none' }} 
+                                    title="Resume Preview"
+                                ></iframe>
+                                
+                                {/* Overlay for mobile to encourage direct view if iframe is wonky */}
+                                <div className="md:hidden" style={{ position: 'absolute', bottom: '10px', right: '10px' }}>
+                                    <a href={resumeData} target="_blank" rel="noopener noreferrer" className="btn btn-secondary" style={{ padding: '0.5rem', fontSize: '0.7rem' }}>
+                                        <ExternalLink size={14} /> Full Screen
+                                    </a>
+                                </div>
                             </div>
 
-                            <a 
-                                href={resumeData} 
-                                download="Mark_Glentablada_Resume.pdf"
-                                className="btn btn-primary"
-                                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', width: 'auto', padding: '1rem 2rem' }}
-                            >
-                                <Download size={22} /> Download Resume
-                            </a>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '1rem' }}>
+                                <a 
+                                    href={resumeData} 
+                                    download="Mark_Glentablada_Resume.pdf"
+                                    className="btn btn-primary"
+                                    style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', width: 'auto', padding: '1rem 2rem' }}
+                                >
+                                    <Download size={22} /> Download Resume
+                                </a>
+                                
+                                <a 
+                                    href={resumeData} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="btn btn-secondary md:hidden"
+                                    style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', width: 'auto', padding: '1rem 2rem' }}
+                                >
+                                    <ExternalLink size={22} /> View Full PDF
+                                </a>
+                            </div>
                         </div>
                     ) : (
                         <div style={{ padding: '2rem 0' }}>
                             <h3 style={{ marginBottom: '0.5rem', fontSize: '1.4rem' }}>No Resume Available</h3>
-                            <p style={{ color: 'var(--text-secondary)' }}>Check back later or upload one below if logged in.</p>
+                            <p style={{ color: 'var(--text-secondary)' }}>
+                                {isLoggedIn ? 'Please upload your resume (PDF) below.' : 'The resume has not been uploaded yet. Please check back later.'}
+                            </p>
                         </div>
                     )}
 
@@ -122,13 +177,18 @@ const Resume = () => {
                                 onChange={handleFileChange}
                                 style={{ display: 'none' }}
                             />
-                            <button 
-                                onClick={triggerFileInput}
-                                className="btn btn-secondary"
-                                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.8rem', justifyContent: 'center' }}
-                            >
-                                <Upload size={20} /> {resumeData ? 'Replace Resume (PDF)' : 'Upload Resume (PDF)'}
-                            </button>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center' }}>
+                                <button 
+                                    onClick={triggerFileInput}
+                                    className="btn btn-secondary"
+                                    style={{ display: 'inline-flex', alignItems: 'center', gap: '0.8rem', justifyContent: 'center' }}
+                                >
+                                    <Upload size={20} /> {resumeData ? 'Replace Resume (Local)' : 'Upload Resume (Local)'}
+                                </button>
+                                <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', maxWidth: '300px' }}>
+                                    Note: Local uploads only save on this device. For a permanent fix, place <b>resume.pdf</b> in your project's <b>public</b> folder.
+                                </p>
+                            </div>
                         </div>
                     )}
                 </motion.div>
@@ -138,3 +198,4 @@ const Resume = () => {
 };
 
 export default Resume;
+
