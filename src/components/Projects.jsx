@@ -76,6 +76,14 @@ const Projects = () => {
             tags: ["React", "Electron", "WireGuard", "Node.js"],
             link: "https://github.com/NowUSeeMee?tab=repositories",
             image: "/images/Vpn.png"
+        },
+        {
+            id: 10,
+            title: "Sword Art Online",
+            description: "A Roblox game development project inspired by the Sword Art Online anime, featuring custom environments and systems.",
+            tags: ["Roblox", "Luau", "Game Development"],
+            link: "https://github.com/NowUSeeMee?tab=repositories",
+            image: "/images/swordartonline.png"
         }
     ];
 
